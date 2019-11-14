@@ -32,6 +32,24 @@ class ListDBParser {
             index++;
         }
         int count = Integer.parseInt(parse_count.toString());
+
+        StringBuilder parse_key_size = new StringBuilder();
+        index++;
+        if (chars[index] != 'k') {
+            throw new ListDBException("Invalid format for data response. Expected key size.");
+        }
+        index++;
+        while (index < chars.length && chars[index] != ':') {
+            LOG.debug("char = {}", chars[index]);
+            if (Character.isDigit(chars[index])) {
+                parse_key_size.append(chars[index]);
+            } else {
+                throw new ListDBException("Invalid format for data response. Invalid character in count.");
+            }
+            index++;
+        }
+        int key_size = Integer.parseInt(parse_key_size.toString());
+
         List<Integer> data_breaks = new ArrayList<>();
         index++;
         StringBuilder break_position = new StringBuilder();
@@ -48,10 +66,19 @@ class ListDBParser {
         for (Integer pos : data_breaks) {
             String item = new String(Arrays.copyOfRange(chars, index, index + pos));
             LOG.debug("item = '{}'", item);
-            String key = item.substring(0,36);
-            String value = item.substring(36);
-            LOG.debug("[key,value] = ['{}','{}']", key, value);
-            parsed.add(new Record(key, value));
+            if (key_size > 0) {
+                LOG.debug("pos={}, key_size={}", pos, key_size);
+                String key = item.substring(0, key_size);
+                String value = item.substring(key_size);
+                LOG.debug("[key,value] = ['{}','{}']", key, value);
+                parsed.add(new Record(key, value));
+            } else {
+                String key = "";
+                String value = item.substring(key_size);
+                LOG.debug("[key,value] = ['{}','{}']", key, value);
+                parsed.add(new Record(key, value));
+            }
+
             index += pos;
         }
         return parsed;
