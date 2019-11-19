@@ -94,3 +94,4 @@ fabric.properties
 hs_err_pid*
 
 
+/src/test/resources/listdb-active/new-for-test.tpc

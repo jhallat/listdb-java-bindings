@@ -59,4 +59,30 @@ public class ListDBConnection {
         return topic;
 
     }
+
+    public Topic createTopic(String id) throws ListDBException {
+        String response = socket.request("create topic " + id);
+        if (response.equals("a")) {
+            return getTopic(id);
+        } else {
+            if (response.startsWith("x") || response.length() < 3) {
+                String message = response.substring(2);
+                throw new ListDBException("Error creating topic " + id + ". " + message);
+            } else {
+                throw new ListDBException("Unknown error creating topic " + id + ".");
+            }
+        }
+    }
+
+    public void dropTopic(String id) throws ListDBException {
+        String response = socket.request("drop topic " + id);
+        if (!response.equals("a")) {
+            if (response.startsWith("x") || response.length() < 3) {
+                String message = response.substring(2);
+                throw new ListDBException("Error dropping topic " + id + ". " + message);
+            } else {
+                throw new ListDBException("Unknown error dropping topic " + id + ".");
+            }
+        }
+    }
 }
