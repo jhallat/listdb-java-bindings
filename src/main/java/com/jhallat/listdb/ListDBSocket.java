@@ -11,7 +11,7 @@ import java.net.Socket;
 
 class ListDBSocket {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ListDBConnection.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Directory.class);
 
     private final String hostname;
     private final int port;
@@ -56,12 +56,28 @@ class ListDBSocket {
         }
     }
 
-    protected String request(String request) throws ListDBException {
+    private ListDBResponseType parseReturnType(String content) {
+        if (content == null || content.isEmpty()) {
+            return ListDBResponseType.UNKNOWN;
+        }
+        char type = content.charAt(0);
+        switch (type) {
+            case 'e': return ListDBResponseType.INVALID;
+            case 'a': return ListDBResponseType.OK;
+            case 'c': return ListDBResponseType.OPEN_CONTEXT;
+            case 'd': return ListDBResponseType.DATA;
+            case 'x': return ListDBResponseType.ERROR;
+        }
+        return ListDBResponseType.UNKNOWN;
+    }
+
+    protected ListDBResponse request(String request) throws ListDBException {
 
         out.println(request);
         try {
             String response = in.readLine();
-            return response;
+            ListDBResponseType type = parseReturnType(response);
+            return new ListDBResponse(type, response);
         } catch (IOException e) {
             throw new ListDBException("Error getting request", e);
         }

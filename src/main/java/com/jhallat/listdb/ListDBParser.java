@@ -11,6 +11,21 @@ class ListDBParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(ListDBParser.class);
 
+    protected void handleError(ListDBResponse response) throws ListDBException {
+
+        if (response.getResponseType() == ListDBResponseType.ERROR ||
+                response.getResponseType() == ListDBResponseType.INVALID) {
+            String errorMessage;
+            if (response.getContents().length() > 2) {
+                errorMessage = response.getContents().substring(2);
+            } else {
+                errorMessage = "UNKNOWN";
+            }
+            throw new ListDBException(errorMessage);
+        }
+        throw new ListDBException(("UNKNOWN"));
+    }
+
     protected List<Record> parseData(final String data) throws ListDBException {
         LOG.debug("data rcvd: {}", data);
         List<Record> parsed = new ArrayList<>();
