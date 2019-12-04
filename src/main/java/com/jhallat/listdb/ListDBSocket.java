@@ -67,6 +67,7 @@ class ListDBSocket {
             case 'c': return ListDBResponseType.OPEN_CONTEXT;
             case 'd': return ListDBResponseType.DATA;
             case 'x': return ListDBResponseType.ERROR;
+            case 'i': return ListDBResponseType.CREATED;
         }
         return ListDBResponseType.UNKNOWN;
     }

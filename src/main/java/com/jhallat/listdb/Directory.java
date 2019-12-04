@@ -32,7 +32,8 @@ public class Directory {
         socket = new ListDBSocket(host, port);
         socket.open();
         if (!contextPath.isEmpty()) {
-            socket.request("open directory " + contextPath);
+            ListDBResponse response = socket.request("open directory " + contextPath);
+            LOG.debug("open connection response = {}", response);
         }
 
     }
@@ -71,7 +72,13 @@ public class Directory {
         if (topics.stream().noneMatch(item -> item.getValue().equals(id))) {
             throw new ListDBException("Topic " + id + " does not exist.");
         }
-        Topic topic = new Topic(id, new ListDBSocket(host, port));
+        String topicId;
+        if (!contextPath.isEmpty()) {
+            topicId = contextPath + "/" + id;
+        } else {
+            topicId = id;
+        }
+        Topic topic = new Topic(topicId, new ListDBSocket(host, port));
         topic.open();
         return topic;
 

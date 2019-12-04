@@ -34,4 +34,19 @@ public class Topic {
         }
         throw new ListDBException("UNKNOWN");
     }
+
+    public String add(String item) throws ListDBException {
+        ListDBResponse response = socket.request("add " + item);
+        LOG.debug("{}", response);
+        if (response.getResponseType() == ListDBResponseType.CREATED) {
+            if (response.getContents().length() > 2) {
+                return response.getContents().substring(2);
+            } else {
+                throw new ListDBException("Id not returned for created item");
+            }
+        } else {
+            parser.handleError(response);
+        }
+        throw new ListDBException("UNKNOWN");
+    }
 }

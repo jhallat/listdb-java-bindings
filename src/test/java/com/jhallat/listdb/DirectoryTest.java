@@ -89,6 +89,19 @@ public class DirectoryTest {
     }
 
     @Test
+    public void item_should_be_added_to_topic() throws ListDBException {
+        ListDBDataSource dataSource = new ListDBDataSource(DB_HOST, DB_PORT);
+        Directory rootDirectory = dataSource.getRootDirectory();
+        Topic itemAddTopic = rootDirectory.getTopic("items-to-add");
+        String id = itemAddTopic.add("new item");
+        LOG.debug("new item id = {}", id);
+        assertNotNull(id);
+        List<Record> records = itemAddTopic.list();
+        assertNotNull(records);
+        assertEquals(1, records.size());
+    }
+
+    @Test
     public void open_connection_should_return_topics() throws ListDBException {
         ListDBDataSource dataSource = new ListDBDataSource(DB_HOST, DB_PORT);
         Directory rootDirectory = dataSource.getRootDirectory();
@@ -107,6 +120,19 @@ public class DirectoryTest {
         assertNotNull(topics);
         Optional<Record> firstActual = topics.stream().filter(record -> record.getValue().equals("child-topic")).findFirst();
         assertTrue(firstActual.isPresent());
+    }
+
+    @Test void child_topic_should_return_items() throws ListDBException {
+        ListDBDataSource dataSource = new ListDBDataSource(DB_HOST, DB_PORT);
+        Directory directory = dataSource.getDirectoryFromPath("directory-one");
+        List<Record> topics = directory.getTopics();
+        assertNotNull(topics);
+        Optional<Record> firstTopicActual = topics.stream().filter(record -> record.getValue().equals("child-topic")).findFirst();
+        assertTrue(firstTopicActual.isPresent());
+        Topic topic = directory.getTopic("child-topic");
+        List<Record> items = topic.list();
+        assertEquals(1, items.size());
+        directory.close();
     }
 
     @Test
